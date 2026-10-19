@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>음식별 혈당 변화 실험 기록</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f6f2;--card:#fff;--ink:#17302a;--mute:#5d726b;--line:#d5dfd9;--acc:#0f766e;--accbg:#d9efea;--up:#c2410c;--down:#1d6fb8;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10201c;--card:#18302a;--ink:#e6f1ed;--mute:#9bb3ab;--line:#2c4a42;--acc:#4fd1c0;--accbg:#1f4a43;--up:#fb923c;--down:#60a5fa;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10201c;--card:#18302a;--ink:#e6f1ed;--mute:#9bb3ab;--line:#2c4a42;--acc:#4fd1c0;--accbg:#1f4a43;--up:#fb923c;--down:#60a5fa;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans KR",system-ui,-apple-system,"Malgun Gothic",sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.6rem;margin:4px 0 2px;letter-spacing:-.02em}
+.sub{color:var(--mute);margin:0 0 16px}
+nav{display:flex;gap:6px;margin-bottom:14px;border-bottom:2px solid var(--line)}
+nav button{background:none;border:0;padding:10px 16px;font:inherit;font-weight:500;color:var(--mute);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
+nav button[aria-selected="true"]{color:var(--acc);border-color:var(--acc);font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px}
+h2{font-size:1.1rem;margin:0 0 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+label{display:block;font-size:.85rem;color:var(--mute);margin-bottom:3px}
+input,select,textarea{width:100%;font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid var(--acc);outline-offset:1px}
+.btn{font:inherit;font-weight:700;border:0;border-radius:6px;padding:10px 18px;background:var(--acc);color:#fff;cursor:pointer}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn{color:#06201b}}
+:root[data-theme="dark"] .btn{color:#06201b}
+.btn.ghost{background:none;color:var(--ink);border:1px solid var(--line);font-weight:500}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-top:12px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:.88rem}
+.chip.done{background:var(--accbg);border-color:var(--acc);font-weight:700}
+.msg{min-height:1.4em;font-size:.9rem;color:var(--up);margin-top:8px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child,th.l,td.l{text-align:left}
+th{color:var(--mute);font-weight:500;font-size:.82rem}
+.pos{color:var(--up);font-weight:700}.neg{color:var(--down);font-weight:700}
+.bars .r{display:grid;grid-template-columns:minmax(110px,170px) 1fr 70px;gap:10px;align-items:center;margin:9px 0}
+.bars .nm{font-size:.9rem;line-height:1.3}
+.track{position:relative;height:26px;background:var(--bg);border-radius:4px}
+.track::before{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:2px;background:var(--mute)}
+.bar{position:absolute;top:3px;bottom:3px;border-radius:3px}
+.bars .v{font-weight:700;font-size:.92rem;text-align:right}
+.axis{display:flex;justify-content:space-between;font-size:.78rem;color:var(--mute);margin:0 70px 0 180px}
+@media (max-width:560px){.bars .r{grid-template-columns:1fr 60px}.bars .nm{grid-column:1/-1;margin-bottom:-4px}.axis{margin:0 60px 0 0}}
+.empty{color:var(--mute);padding:14px 0}
+.note{font-size:.82rem;color:var(--mute);margin-top:10px}
+button.chip{font:inherit;color:inherit;background:none;cursor:pointer}
+button.chip.done{background:var(--accbg)}
+button.chip[aria-pressed="true"]{outline:3px solid var(--acc);outline-offset:1px;font-weight:700}
+#ent td{padding:5px 6px}
+#ent input{padding:7px 8px;min-width:78px}
+#ent input[type=text]{min-width:96px}
+#ent .nm{white-space:normal;min-width:170px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>음식별 혈당 변화 실험 기록</h1>
+<p class="sub">섭취 전과 30분 후 혈당을 입력하면 변화량이 자동으로 계산됩니다.</p>
+<p class="note" id="stat" role="status"></p>
+<nav role="tablist">
+<button role="tab" id="t1" aria-selected="true" data-tab="in">기록 입력</button>
+<button role="tab" id="t2" aria-selected="false" data-tab="out">결과 분석</button>
+</nav>
+
+<section id="in">
+<div class="card">
+<h2>모둠 선택</h2>
+<div class="chips" id="prog"></div>
+</div>
+<div class="card">
+<h2 id="gt"></h2>
+<div class="scroll"><table id="ent"></table></div>
+<p class="note">6가지 음식이 한 화면에 모두 있습니다. 해당 음식을 먹은 학생의 혈당(mg/dL)만 입력하면 자동 저장됩니다. 20~600 범위를 벗어난 값은 통계에서 제외됩니다.</p>
+</div>
+</section>
+
+<section id="out" hidden>
+<div class="card">
+<h2>음식별 평균 혈당 변화 (30분 후 − 섭취 전)</h2>
+<div id="chart"></div>
+</div>
+<div class="card">
+<h2>음식별 요약</h2>
+<div class="scroll" id="sum"></div>
+<p class="note">측정 인원이 적으면 한두 명의 값이 평균을 크게 좌우합니다. 개인차, 공복 여부, 측정 오차를 함께 생각해 보세요.</p>
+</div>
+<div class="card">
+<h2>결론 정리</h2>
+<label for="concl">우리 반의 결론 (어떤 음식이 혈당을 가장 많이 올렸나요? 왜 그렇게 생각하나요?)</label>
+<textarea id="concl" rows="5"></textarea>
+<div class="row">
+<button class="btn ghost" id="csv">CSV로 내려받기</button>
+<button class="btn ghost" id="reset">전체 기록 삭제</button>
+</div>
+</div>
+</section>
+<p class="note">교육용 실험 기록이며 진단이나 치료를 위한 자료가 아닙니다.</p>
+</div>
+
+<script>
+const FOODS=[
+{n:"계란 1개 + 올리브오일 + 후추",c:"#b7791f"},
+{n:"생오렌지 반 개",c:"#ea8a1a"},
+{n:"카프리썬 오렌지 200ml",c:"#d9480f"},
+{n:"카프리썬 오렌지 제로 200ml",c:"#2f9e8f"},
+{n:"코카콜라 250ml",c:"#b42318"},
+{n:"코카콜라 제로 250ml",c:"#5b6770"}
+];
+const KEY="bgLab.v1";
+let st={rec:[],concl:""};
+try{const r=localStorage.getItem(KEY);if(r){const p=JSON.parse(r);if(p&&Array.isArray(p.rec))st=p}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=v=>(v>0?"+":"")+v.toFixed(1).replace(/\.0$/,"");
+const cls=v=>v>0?"pos":v<0?"neg":"";
+let cur=1;
+function derive(){st.rec=[];for(const g in st.data)for(const f in st.data[g]){const e=st.data[g][f],a=parseFloat(e.pre),b=parseFloat(e.post);if(isFinite(a)&&isFinite(b)&&a>=20&&a<=600&&b>=20&&b<=600)st.rec.push({g:+g,f:+f,s:e.s||"",pre:a,post:b})}}
+if(!st.data){st.data={};st.rec.forEach(r=>{(st.data[r.g]=st.data[r.g]||{})[r.f]={s:r.s,pre:r.pre,post:r.post}})}
+derive();
+
+function tab(t){
+ $("in").hidden=t!=="in";$("out").hidden=t!=="out";
+ $("t1").setAttribute("aria-selected",t==="in");$("t2").setAttribute("aria-selected",t==="out");
+ if(t==="out")renderOut();
+}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>tab(b.dataset.tab));
+
+function chips(){
+ $("prog").innerHTML=[1,2,3,4,5,6].map(g=>{
+  const n=new Set(st.rec.filter(r=>r.g===g).map(r=>r.f)).size;
+  return `<button class="chip ${n===6?"done":""}" data-g="${g}" aria-pressed="${g===cur}">${g}모둠 ${n}/6</button>`;
+ }).join("");
+ $("prog").querySelectorAll("button").forEach(b=>b.onclick=()=>{cur=+b.dataset.g;renderIn()});
+}
+function rowD(g,f){
+ const e=(st.data[g]||{})[f]||{},a=parseFloat(e.pre),b=parseFloat(e.post);
+ const ok=v=>isFinite(v)&&v>=20&&v<=600;
+ return ok(a)&&ok(b)?b-a:null;
+}
+function renderIn(){
+ chips();
+ $("gt").textContent=cur+"모둠 혈당 기록";
+ $("ent").innerHTML=`<thead><tr><th class="l">음식</th><th>섭취 전</th><th>30분 후</th><th>변화</th></tr></thead><tbody>`+FOODS.map((f,i)=>{
+  const e=(st.data[cur]||{})[i]||{},d=rowD(cur,i),n=esc(f.n);
+  return `<tr><td class="l nm"><span class="dot" style="background:${f.c}"></span>${i+1}. ${n}</td>`+
+  `<td><input data-f="${i}" data-k="pre" type="number" inputmode="numeric" value="${e.pre??""}" aria-label="${n} 섭취 전 혈당"></td>`+
+  `<td><input data-f="${i}" data-k="post" type="number" inputmode="numeric" value="${e.post??""}" aria-label="${n} 30분 후 혈당"></td>`+
+  `<td id="d${i}" class="${d==null?"":cls(d)}">${d==null?"-":fmt(d)}</td></tr>`;
+ }).join("")+"</tbody>";
+ $("ent").querySelectorAll("input").forEach(inp=>inp.oninput=()=>{
+  const f=inp.dataset.f,g=st.data[cur]=st.data[cur]||{},row=g[f]=g[f]||{};
+  row[inp.dataset.k]=inp.value;
+  derive();save();chips();
+  const gn=cur;clearTimeout(timers[gn+"_"+f]);timers[gn+"_"+f]=setTimeout(()=>push({g:gn,f:+f,pre:row.pre??"",post:row.post??""}),600);
+  const d=rowD(cur,+f),c=$("d"+f);
+  c.textContent=d==null?"-":fmt(d);c.className=d==null?"":cls(d);
+ });
+}
+
+function stats(){
+ return FOODS.map((f,i)=>{
+  const rs=st.rec.filter(r=>r.f===i),n=rs.length;
+  if(!n)return {i,n:0};
+  const ds=rs.map(r=>r.post-r.pre),avg=a=>a.reduce((x,y)=>x+y,0)/a.length;
+  return {i,n,pre:avg(rs.map(r=>r.pre)),post:avg(rs.map(r=>r.post)),d:avg(ds),min:Math.min(...ds),max:Math.max(...ds)};
+ });
+}
+
+function renderOut(){
+ const S=stats();
+ if(!st.rec.length){
+  $("chart").innerHTML='<div class="empty">기록이 입력되면 그래프가 나타납니다.</div>';
+  $("sum").innerHTML='<div class="empty">기록이 없습니다.</div>';
+ }else{
+  const m=Math.max(10,...S.filter(s=>s.n).map(s=>Math.abs(s.d)));
+  $("chart").innerHTML='<div class="bars">'+S.map(s=>{
+   const f=FOODS[s.i];
+   if(!s.n)return `<div class="r"><div class="nm">${esc(f.n)}</div><div class="track"></div><div class="v" style="color:var(--mute)">-</div></div>`;
+   const w=Math.abs(s.d)/m*50,left=s.d>=0?50:50-w;
+   return `<div class="r"><div class="nm">${esc(f.n)}</div><div class="track"><div class="bar" style="left:${left}%;width:${w}%;background:${f.c}"></div></div><div class="v ${cls(s.d)}">${fmt(s.d)}</div></div>`;
+  }).join("")+`</div><div class="axis"><span>← 혈당 감소</span><span>0</span><span>혈당 증가 →</span></div>`;
+  const rk=[...S].filter(s=>s.n).sort((a,b)=>b.d-a.d);
+  $("sum").innerHTML=`<table><thead><tr><th class="l">음식</th><th>인원</th><th>평균 전</th><th>평균 30분 후</th><th>평균 변화</th><th>최소</th><th>최대</th><th>순위</th></tr></thead><tbody>`+
+  S.map(s=>{
+   const f=FOODS[s.i];
+   if(!s.n)return `<tr><td class="l">${esc(f.n)}</td><td>0</td><td colspan="6" style="color:var(--mute)">기록 없음</td></tr>`;
+   return `<tr><td class="l">${esc(f.n)}</td><td>${s.n}</td><td>${s.pre.toFixed(1)}</td><td>${s.post.toFixed(1)}</td><td class="${cls(s.d)}">${fmt(s.d)}</td><td>${fmt(s.min)}</td><td>${fmt(s.max)}</td><td>${rk.indexOf(s)+1}위</td></tr>`;
+  }).join("")+`</tbody></table>`;
+ }
+ $("concl").value=st.concl||"";
+}
+$("concl").oninput=e=>{st.concl=e.target.value;save()};
+
+$("csv").onclick=()=>{
+ if(!st.rec.length){alert("내려받을 기록이 없습니다.");return}
+ const L=["모둠,음식,섭취 전,30분 후,변화"].concat(st.rec.map(r=>[r.g,'"'+FOODS[r.f].n+'"',r.pre,r.post,r.post-r.pre].join(",")));
+ const a=document.createElement("a");
+ a.href="data:text/csv;charset=utf-8,%EF%BB%BF"+encodeURIComponent(L.join("\n"));
+ a.download="혈당실험기록.csv";a.click();
+};
+$("reset").onclick=()=>{
+ if(confirm("모든 기록과 결론을 삭제할까요? 되돌릴 수 없습니다.")){st={rec:[],concl:"",data:{}};save();renderIn();renderOut();push({reset:1})}
+};
+renderIn();
+
+/* ===== 구글 시트 연동 설정 (2줄만 바꾸세요) ===== */
+const SYNC_URL="https://script.google.com/macros/s/AKfycbzqZPH2J3Nyn0Cjbh8xHSlrXdfiO1BhU_FwWV0rlkTcQciuWmwr6a2b2ZaqLYkd2SSGXQ/exec";
+const TOKEN="healthy2026";
+/* ============================================== */
+const syncOn=SYNC_URL.startsWith("https://");
+const timers={};
+function setStat(t){$("stat").textContent=t}
+function push(o){
+ if(!syncOn)return;
+ o.token=TOKEN;setStat("저장 중...");
+ fetch(SYNC_URL,{method:"POST",body:JSON.stringify(o)})
+  .then(()=>setStat("구글 시트에 저장됨 "+new Date().toLocaleTimeString("ko-KR")))
+  .catch(()=>setStat("저장 실패: 인터넷 연결을 확인하세요"));
+}
+async function pull(){
+ if(!syncOn)return;
+ const a=document.activeElement;
+ if(a&&a.matches&&a.matches("#ent input"))return;
+ try{
+  const r=await fetch(SYNC_URL+"?token="+encodeURIComponent(TOKEN));
+  const rows=await r.json();
+  if(!Array.isArray(rows))throw 0;
+  st.data={};
+  rows.forEach(x=>{(st.data[x.g]=st.data[x.g]||{})[x.f]={pre:x.pre,post:x.post}});
+  derive();save();
+  if(!$("in").hidden)renderIn();else renderOut();
+  setStat("구글 시트와 동기화됨 "+new Date().toLocaleTimeString("ko-KR"));
+ }catch(e){setStat("시트 연결 실패: 주소와 비밀문자를 확인하세요")}
+}
+if(syncOn){pull();setInterval(pull,10000)}else setStat("구글 시트 연동 전: 이 기기에만 저장됩니다");
+</script>
+</body>
+</html>
